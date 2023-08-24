@@ -1,4 +1,6 @@
-﻿using Dispatcher.Models;
+﻿using Dispatcher.Endpoints;
+using Dispatcher.FakeGpt;
+using Dispatcher.Models;
 
 namespace Dispatcher.Middlewares.api;
 
@@ -7,13 +9,15 @@ namespace Dispatcher.Middlewares.api;
 // 在此之前应该添加额外的不需要数据库的判断，比如ip过滤，内存数据对比
 public class SecureMiddleware
 {
+    private DynamicTable _table;
     private readonly RequestDelegate _next;
     private readonly IServiceProvider _provider;
 
-    public SecureMiddleware(RequestDelegate next,IServiceProvider provider)
+    public SecureMiddleware(RequestDelegate next,IServiceProvider provider,DynamicTable table)
     {
         _provider = provider;
         _next = next;
+        _table = table;
     }
 
     public async Task Invoke(HttpContext context)
@@ -28,13 +32,31 @@ public class SecureMiddleware
         var authKey = auth?[7..];
         using var scope = _provider.CreateScope();
         await using var data = scope.ServiceProvider.GetRequiredService<DataContext>();
-        var openKey = data.OpenKeys.FirstOrDefault(key=>key.Key==authKey);
-        if (openKey == null)
+
+        async Task KeyNotAllow()
         {
-            context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+            await new TestTransferEndpoint().Endpoint(context);// 如果不是我们签发的，直接返回fake gpt
             await context.Response.WriteAsync("使用的密钥不是我们签发的，或者在数据库中找不到这个密钥");
+        }
+
+        OpenKey? openKey;
+        if (_table.IsNotAllowKey(authKey ?? ""))
+        {
+            await KeyNotAllow();
             return;
         }
+
+        openKey = data.OpenKeys.FirstOrDefault(key=>key.Key==authKey);
+        if (openKey == null)
+        {
+            _table.PutNotAllowKey(authKey??"");
+            // context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+            await KeyNotAllow();
+            return;
+        }
+
+
+        context.Items["RequestKey"] = openKey;
 
         switch (openKey.PricingMethod)
         {

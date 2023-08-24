@@ -1,4 +1,6 @@
-﻿namespace Dispatcher.Middlewares.api;
+﻿using Dispatcher.Models;
+
+namespace Dispatcher.Middlewares.api;
 
 public class PricingMiddleware
 {
@@ -12,10 +14,23 @@ public class PricingMiddleware
 
     public async Task InvokeAsync(HttpContext context)
     {
-
         await _next(context);
-        await context.Response.WriteAsync((context.Items["PickedKey"] ?? "").ToString() ?? string.Empty);
+        var pickedKey = (OpenKey)context.Items["RequestKey"];
+        using var scope = _provider.CreateScope();
+        await using var data = scope.ServiceProvider.GetRequiredService<DataContext>();
+        if (pickedKey == null)
+        {
+            return;
+        }
+
+        var key = data.OpenKeys.FirstOrDefault(key => key.OpenKeyId == pickedKey.OpenKeyId);
+        if (key != null)
+        {
+            key.AvailableRequest -= 1;
+            await data.SaveChangesAsync();
+        }
+        //await context.Response.WriteAsync((context.Items["PickedKey"] ?? "").ToString() ?? string.Empty);
         //await context.Response.WriteAsync("appended");
-        // TODO: 在此处添加您的代码
+
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System.Net.Http.Headers;
 using System.Text;
 using Dispatcher.Models;
+using System;
 
 namespace Dispatcher.Endpoints;
 
@@ -51,15 +52,27 @@ public class TransferEndpoint
         // 添加请求体和请求头
         var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
         var contentStream = await response.Content.ReadAsStreamAsync();
-        var streamReader = new StreamReader(contentStream, Encoding.UTF8);
-        var stringBuilder = new StringBuilder();
-        while (!streamReader.EndOfStream)// 读取数据并返回
+
+        // 设置转发响应的Content-Type头
+        try
         {
-            var line = await streamReader.ReadLineAsync();
-            stringBuilder.AppendLine(line);
-            await context.Response.WriteAsync(stringBuilder.ToString());
-            stringBuilder.Clear();
+            context.Response.ContentType = response.Content.Headers.ContentType.ToString();
         }
+        catch
+        {//ignore
+
+        }
+
+        var buffer = new byte[50];
+        int bytesRead;
+        while ((bytesRead = await contentStream.ReadAsync(buffer, 0, buffer.Length)) > 0)
+        {
+            await context.Response.Body.WriteAsync(buffer, 0, bytesRead);
+            await context.Response.Body.FlushAsync();
+        }
+        // var originalContent = await response.Content.ReadAsStringAsync();
+        // context.Response.ContentType = response!.Content!.Headers!.ContentType!.ToString();
+        // await context.Response.WriteAsync(originalContent);
 
     }
 }

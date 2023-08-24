@@ -5,38 +5,47 @@ namespace Dispatcher.Models;
 
 public class DynamicTable
 {
-    private ServerBaseLimit _serverBaseLimit;
+    private volatile ServerBaseLimit _serverBaseLimit;
     public DynamicTable(IOptions<ServerBaseLimit> options)
     {
         _serverBaseLimit = options.Value;
     }
-    public Dictionary<string, int> KeyAvailable
-    {
-        get;
-        set;
-    } = new Dictionary<string, int>();
+    public volatile Dictionary<string, int> KeyAvailable = new Dictionary<string, int>();
 
-    public Dictionary<string, int> IpAvailable
-    {
-        get;
-        set;
-    } = new Dictionary<string, int>();
+    public volatile Dictionary<string, int> IpAvailable = new Dictionary<string, int>();
 
-    public int ServerServeAvailable
+    public volatile HashSet<string> NotAllowKeys = new HashSet<string>();
+
+    public void PutNotAllowKey(string key)
     {
-        get;
-        set;
+        NotAllowKeys.Add(key);
     }
 
-    public bool Accept(string key, string ip)
+    public int ServerServeAvailable = 1;
+
+    public const int OutLimit = 1;
+    public const int IpOutLimit = 2;
+    public const int KeyOutLimit = 3;
+    public const int KeyIsNotAllow = 5;
+    public const int Success = 4;
+
+    public bool IsNotAllowKey(string key)
+    {
+        return NotAllowKeys.Contains(key);
+    }
+    public int Accept(string key, string ip)
     {
         if (ServerServeAvailable <= 0)
         {
-            return false;
+            return OutLimit;
         }
 
         ServerServeAvailable--;
 
+        if (NotAllowKeys.Contains(key))
+        {
+            return KeyIsNotAllow;
+        }
         if (!IpAvailable.ContainsKey(ip))
         {
             IpAvailable[ip] = _serverBaseLimit.IpRequestLimit;
@@ -47,15 +56,20 @@ public class DynamicTable
             KeyAvailable[key] = _serverBaseLimit.KeyRequestLimit;
         }
 
-        if (IpAvailable[ip] <= 0 || KeyAvailable[key] <= 0)
+        if (IpAvailable[ip] <= 0  )
         {
-            return false;
+            return IpOutLimit;
+        }
+
+        if (KeyAvailable[key] <= 0)
+        {
+            return KeyOutLimit;
         }
 
         IpAvailable[ip]--;
         KeyAvailable[key]--;
 
-        return true;
+        return Success;
     }
 
     public void Reset()
@@ -69,6 +83,7 @@ public class DynamicTable
         {
             KeyAvailable[keyPair.Key] = _serverBaseLimit.KeyRequestLimit;
         }
+        NotAllowKeys.Clear();
 
         ServerServeAvailable = _serverBaseLimit.ServerServeLimit;
     }

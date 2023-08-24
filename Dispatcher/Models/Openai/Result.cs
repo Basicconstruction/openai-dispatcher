@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace Dispatcher.Models.openai;
+namespace Dispatcher.Models.Openai;
 
 public class Choice
 {

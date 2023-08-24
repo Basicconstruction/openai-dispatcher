@@ -14,6 +14,11 @@ public class Starter
         _provider = provider;
     }
 
+    // dotnet tool install --global dotnet-ef --version 3.1.1
+    //  sqlcmd -S "(localdb)\MSSQLLocalDB"
+    //  create database DispatcherCache
+    //  go
+    //  dotnet sql-cache create "server=(localdb)\MSSQLLocalDB;database=DispatcherCache" dbo DataCache
     public void Init()
     {
         using var scope = _provider.CreateScope();

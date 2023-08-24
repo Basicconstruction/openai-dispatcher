@@ -1,9 +1,11 @@
 ﻿using Dispatcher.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Dispatcher.Controllers;
 
 [ApiController]
+[Authorize]
 [Route("admin/[controller]")]
 public class StatusController
 {

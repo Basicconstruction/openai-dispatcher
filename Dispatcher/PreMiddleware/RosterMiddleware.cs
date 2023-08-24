@@ -46,11 +46,25 @@ public class RosterMiddleware
 
         key = auth[7..];
 
-        if (!_table.Accept(key, ip))
+        switch (_table.Accept(key,ip))
         {
-            context.Response.StatusCode = StatusCodes.Status102Processing;
-            await context.Response.WriteAsync("请求速度过快，请等待一分钟");
-            return;
+            case DynamicTable.OutLimit:
+                context.Response.StatusCode = StatusCodes.Status102Processing;
+                await context.Response.WriteAsync("服务器负载过大，请稍后重试");
+                return;
+            case DynamicTable.IpOutLimit:
+                context.Response.StatusCode = StatusCodes.Status102Processing;
+                await context.Response.WriteAsync("当前ip请求速率过快，请稍后重试");
+                return;
+            case DynamicTable.KeyOutLimit:
+                context.Response.StatusCode = StatusCodes.Status102Processing;
+                await context.Response.WriteAsync("当前密钥请求速率过快，请稍后重试");
+                return;
+            // case DynamicTable.KeyIsNotAllow:
+            //     context.Response.StatusCode = StatusCodes.Status102Processing;
+            //     await context.Response.WriteAsync("不合法的key,请1分钟后重试");
+            //     return;
+
         }
 
         await _next(context);

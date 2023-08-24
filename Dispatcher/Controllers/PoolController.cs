@@ -1,11 +1,13 @@
 ﻿using Dispatcher.Models;
 using Dispatcher.Models.Requests;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace Dispatcher.Controllers;
 
 [ApiController]
+[Authorize]
 [Route("admin/[controller]")]
 public class PoolController: Controller
 {
