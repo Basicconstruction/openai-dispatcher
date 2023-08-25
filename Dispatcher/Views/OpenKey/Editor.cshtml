@@ -1,0 +1,66 @@
+﻿@model OpenKeyViewModel
+<h5 class="bg-light text-white text-center p-2">@Model.Action</h5>
+<form method="post" asp-action="Update">
+    <div asp-validation-summary="All" class="text-danger text-start"></div>
+    <div class="form-control">
+        <label asp-for="OpenKey.Key"></label>
+        <div>
+            <span asp-validation-for="OpenKey.Key" class="text-danger"></span>
+        </div>
+        <input class="form-control" asp-for="OpenKey.Key" readonly="@Model.ReadOnly"/>
+    </div>
+    <div class="form-control">
+        <label asp-for="OpenKey.PricingMethod"></label>
+        <div>
+            <span asp-validation-for="OpenKey.PricingMethod" class="text-danger"></span>
+        </div>
+
+        <select class="form-control" asp-for="OpenKey.PricingMethod" disabled="@Model.ReadOnly" asp-items="@ViewBag.Methods">
+        </select>
+    </div>
+    <div class="form-control">
+        <label asp-for="OpenKey.AvailableRequest"></label>
+        <div>
+            <span asp-validation-for="OpenKey.AvailableRequest" class="text-danger"></span>
+        </div>
+
+        <input class="form-control" asp-for="OpenKey.AvailableRequest" readonly="@Model.ReadOnly"/>
+    </div>
+    <div class="form-control">
+        <label asp-for="OpenKey.AvailableRequestToken"></label>
+        <div>
+            <span asp-validation-for="OpenKey.AvailableRequestToken" class="text-danger"></span>
+        </div>
+
+        <input class="form-control" asp-for="OpenKey.AvailableRequestToken" readonly="@Model.ReadOnly"/>
+    </div>
+    <div class="form-control">
+        <label asp-for="OpenKey.Balance"></label>
+        <div>
+            <span asp-validation-for="OpenKey.Balance" class="text-danger" readonly="@Model.ReadOnly"></span>
+        </div>
+
+        <input class="form-control" asp-for="OpenKey.Balance"/>
+    </div>
+    <div class="form-control">
+        <label asp-for="OpenKey.KeyUserId"></label>
+        <div>
+            <span asp-validation-for="OpenKey.KeyUserId" class="text-danger"></span>
+        </div>
+
+        <select class="form-control" asp-for="OpenKey.KeyUserId" disabled="@Model.ReadOnly" asp-items="@ViewBag.Users"></select>
+    </div>
+    <div class="form-control">
+        <label asp-for="OpenKey.Available"></label>
+        <div>
+            <span asp-validation-for="OpenKey.Available" class="text-danger"></span>
+        </div>
+
+        <select class="form-control" asp-for="OpenKey.Available" disabled="@Model.ReadOnly" asp-items="@ViewBag.Availables"></select>
+    </div>
+    @if (Model.ShowAction)
+    {
+        <button class="accordion-button" type="submit">@Model.Action</button>
+    }
+    <a class="btn btn-secondary" asp-action="Index"></a>
+</form>
