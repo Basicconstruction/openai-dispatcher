@@ -2,12 +2,13 @@
 using System.Text;
 using Dispatcher.Models;
 using System;
+using Dispatcher.Models.Requests;
 
 namespace Dispatcher.Endpoints;
 
 public class TransferEndpoint
 {
-    public async Task Endpoint(HttpContext context)
+    public async Task Endpoint(HttpContext context,DataContext data,KeyPoolRepository repository)
     {
         // 对请求的验证可以放置在中间件。
         var path = context.Request.RouteValues["path"]?.ToString();//额外请求路径
@@ -61,6 +62,18 @@ public class TransferEndpoint
         catch
         {//ignore
 
+        }
+
+        if ((int)response.StatusCode != StatusCodes.Status200OK)
+        {
+            var dk = data.PoolKeys.Where(p => p.PoolKeyId == poolKey.PoolKeyId).FirstOrDefault();
+            if (dk != null)
+            {
+                repository.RemovePoolKey(dk);
+                dk.Available = false;
+            }
+
+            data.SaveChanges();
         }
 
         var buffer = new byte[50];

@@ -1,5 +1,6 @@
 using Dispatcher.Boot;
 using Dispatcher.Endpoints;
+using Dispatcher.FakeGpt;
 using Dispatcher.Filters;
 using Dispatcher.Middlewares.api;
 using Dispatcher.Models;
@@ -12,6 +13,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -122,10 +124,15 @@ app.MapControllerRoute(
 app.UseSwagger();
 app.UseSwaggerUI(opts => { opts.SwaggerEndpoint("/swagger/v1/swagger.json", "ws"); });
 AutoMigration.Migration(app);
-new Starter(app.Services, app.Services.GetRequiredService<KeyPoolRepository>()).Init();
+KeyPoolRepository repository = app.Services.GetRequiredService<KeyPoolRepository>();
+var starter = new Starter(app.Services, repository);
 var table = app.Services.GetRequiredService<DynamicTable>();
+using var scope = app.Services.CreateScope();
+await using var context = scope.ServiceProvider.GetRequiredService<DataContext>();
+var syncer = new Syncer(context,repository);
 RecurringJob.AddOrUpdate("easyJob",
     () => table.Reset(), Cron.Minutely);
+RecurringJob.AddOrUpdate("fetchKey",()=> syncer.UpdateDynamicKeys(),Cron.Minutely);
 await SeedIdentityUser.Ensure(app);
 
 app.Run();

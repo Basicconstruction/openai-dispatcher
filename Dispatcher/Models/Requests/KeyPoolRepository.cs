@@ -9,6 +9,15 @@ public class KeyPoolRepository
         set;
     } = new List<PoolKey>();
 
+    public void RemovePoolKey(PoolKey poolKey)
+    {
+        PoolKeys.Remove(poolKey);
+    }
+    public List<PoolKey> CanNotUseKeys
+    {
+        get;
+        set;
+    } = new List<PoolKey>();
     public int Count => PoolKeys.Count;
 
     public void Clear()
@@ -28,5 +37,6 @@ public class KeyPoolRepository
             _poolkey.CopyFrom(poolKey);
         }
     }
+
 
 }
