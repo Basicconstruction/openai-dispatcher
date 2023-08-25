@@ -1,18 +1,48 @@
-﻿@model TModel
+﻿@model IEnumerable<OpenKey>
 
-@{
-    Layout = null;
-}
-
-<!DOCTYPE html>
-
-<html>
-<head>
-    <title>title</title>
-</head>
-<body>
-<div>
-      
+<partial name="_AdminPartial"/>
+<div class="d-flex justify-content-end mb-2 p-2 m-2">
+    <a class="btn btn-primary" href="/admin/openkey/create">Create</a>
 </div>
-</body>
-</html>
+<table class="table table-sm table-bordered table-striped">
+    <thead>
+    <tr>
+        <th>Id</th>
+        <th>Key</th>
+        <th>计价方式</th>
+        <th>可用请求数</th>
+        <th>可用token数</th>
+        <th>余额</th>
+        <th>用户</th>
+        <th>是否可用</th>
+        <th></th>
+    </tr>
+    </thead>
+    <tbody>
+    @if (Model != null)
+    {
+        @foreach (var openKey in Model)
+        {
+            <tr>
+                <td>@openKey.OpenKeyId</td>
+                <td>@openKey.Key</td>
+                <td>@openKey.PricingMethod</td>
+                <td>@openKey.AvailableRequest</td>
+                <td>@openKey.AvailableRequestToken</td>
+                <td>@openKey.Balance</td>
+                <td>@openKey.KeyUser?.UserName</td>
+                <td>@openKey.Available</td>
+                <td class="text-center">
+                    <a asp-controller="OpenKey" asp-action="Details" asp-route-id="@openKey.OpenKeyId"
+                       class="btn btn-sm btn-info">Details</a>
+                    <a asp-controller="OpenKey" asp-action="Edit" asp-route-id="@openKey.OpenKeyId"
+                       class="btn btn-sm btn-info">Edit</a>
+                    <a asp-controller="OpenKey" asp-action="Delete" asp-route-id="@openKey.OpenKeyId"
+                       class="btn btn-sm btn-info">Delete</a>
+
+                </td>
+            </tr>
+        }
+    }
+    </tbody>
+</table>

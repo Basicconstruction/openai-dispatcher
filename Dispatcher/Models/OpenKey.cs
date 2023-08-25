@@ -63,4 +63,22 @@ public class OpenKey
         set;
     }
 
+    public void CopyFrom(OpenKey openKey)
+    {
+        if (openKey == null)
+        {
+            throw new ArgumentNullException(nameof(openKey));
+        }
+
+        OpenKeyId = openKey.OpenKeyId;
+        Key = openKey.Key;
+        PricingMethod = openKey.PricingMethod;
+        AvailableRequest = openKey.AvailableRequest;
+        AvailableRequestToken = openKey.AvailableRequestToken;
+        Balance = openKey.Balance;
+        KeyUserId = openKey.KeyUserId;
+        KeyUser = openKey.KeyUser; // Note: This is a shallow copy. Consider deep copying if needed.
+        Available = openKey.Available;
+    }
+
 }

@@ -35,7 +35,23 @@
     <AdditionalFiles Include="Pages\Shared\Error.cshtml" />
     <AdditionalFiles Include="Pages\Shared\_Layout.cshtml" />
     <AdditionalFiles Include="Pages\Shared\_ValidationScriptsPartial.cshtml" />
+
+
+
+
   </ItemGroup>
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -1,18 +1,48 @@
-﻿@model TModel
+﻿@using System.Globalization
+@model IEnumerable<PoolKey>
 
-@{
-    Layout = null;
-}
+<partial name="_AdminPartial"/>
+<button asp-controller="PoolKey" asp-action="Index">未定义</button>
+<table class="table table-sm table-bordered table-striped">
+    <thead>
+    <tr>
+        <th>Id</th>
+        <th>Key</th>
+        <th>手动主机</th>
+        <th>主机</th>
+        <th>优先级</th>
+        <th>是否可用</th>
+        <th></th>
+    </tr>
+    </thead>
+    <tbody>
+    @if (Model != null)
+    {
+        @foreach (var poolKey in Model)
+        {
+            <tr>
+                <td>@poolKey.PoolKeyId</td>
+                <td>@if (poolKey.Cipher != null)
+                    {
+                        var light = "sk-"+poolKey.Cipher.Substring(3,5) + DateTime.Now.ToString(CultureInfo.InvariantCulture);
+                        @light
+                    }</td>
+                <td>@poolKey.HandHosts</td>
+                <td>@if (poolKey.AvailableHosts != null)
+                    {
+                        @foreach (var host in poolKey.AvailableHosts)
+                        {
+                            @(host+" ")
+                        }
+                    }
+                </td>
+                <td>@poolKey.Priority</td>
+                <td>@poolKey.Available</td>
+                <td>
 
-<!DOCTYPE html>
-
-<html>
-<head>
-    <title>title</title>
-</head>
-<body>
-<div>
-      
-</div>
-</body>
-</html>
+                </td>
+            </tr>
+        }
+    }
+    </tbody>
+</table>

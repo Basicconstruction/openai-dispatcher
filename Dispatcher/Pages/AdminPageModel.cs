@@ -1,6 +1,10 @@
-﻿namespace Dispatcher.Pages;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 
-public class AdminPageModel
+namespace Dispatcher.Pages;
+
+[Authorize(Roles = "Admins")]
+public class AdminPageModel: PageModel
 {
     
 }

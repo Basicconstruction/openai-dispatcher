@@ -27,7 +27,16 @@ public class PoolKey
     [NotMapped]
     public List<string>? AvailableHosts
     {
-        get => JsonConvert.DeserializeObject<List<string>>(Hosts);
+        get {
+            if (Hosts == null)
+            {
+                return null;
+            }
+            else
+            {
+                return JsonConvert.DeserializeObject<List<string>>(Hosts);
+            }
+        }
         set => Hosts = JsonConvert.SerializeObject(value);
     }
     // 手动输入的主机，因为如果需要存储多个主机地址，会进行编码，无法手动更改

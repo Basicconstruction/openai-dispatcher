@@ -1,19 +1,88 @@
-﻿@page
-@model Dispatcher.Pages.AdminPage
+﻿@page "/admin"
+@model AdminPage
 
-@{
-    Layout = null;
-}
 
-<!DOCTYPE html>
+<partial name="Shared/_AdminPartial"/>
+<h4 class="p-2 m-2">服务器动态表</h4>
+<div class="container-fluid">
+    <div class="row">
+        <table class="table table-sm table-striped table-bordered p-2 m-2">
+            <thead>
+            <tr>
+                <th>服务器限制(/min)</th>
+                <th>剩余请求</th>
+            </tr>
+            </thead>
+            <tbody>
+            <td>@Model.ServerBaseLimit.ServerServeLimit</td>
+            <td>@Model.Table.ServerServeAvailable</td>
+            </tbody>
+        </table>
+        <table class="table table-sm table-striped table-bordered p-2 m-2">
+            <thead>
+            <tr>
+                <th>服务器Ip限制(/min)</th>
+                <th>Ip地址</th>
+                <th>IP剩余请求</th>
+            </tr>
+            </thead>
 
-<html lang="zh">
-<head>
-    <title>Editor</title>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css"/>
-</head>
-<body>
-<div class="bg-primary text-white text-center m-2 p-2">Selector</div>
+            <tbody>
+            @if (Model.Table.IpAvailable.Count == 0)
+            {
+                <tr>
+                    <td>@Model.ServerBaseLimit.IpRequestLimit</td>
+                    <td></td>
+                    <td></td>
+                </tr>
+            }
+            else
+            {
+                @foreach (var ipPair in Model.Table.IpAvailable)
+                {
+                    <tr>
+                        <td>@Model.ServerBaseLimit.IpRequestLimit</td>
+                        <td>@ipPair.Key</td>
+                        <td>@ipPair.Value</td>
+                    </tr>
+                }
+            }
+            </tbody>
 
-</body>
-</html>
+        </table>
+        <table class="table table-sm table-striped table-bordered p-2 m-2">
+            <thead>
+            <tr>
+                <th>服务器Key限制(/min)</th>
+                <th>Key</th>
+                <th>Key剩余请求</th>
+            </tr>
+            </thead>
+
+            <tbody>
+            @if (Model.Table.KeyAvailable.Count == 0)
+            {
+                <tr>
+                    <td>@Model.ServerBaseLimit.KeyRequestLimit</td>
+                    <td></td>
+                    <td></td>
+
+                </tr>
+            }
+            else
+            {
+                @foreach (var keyValuePair in Model.Table.KeyAvailable)
+                {
+                    <tr>
+                        <td>@Model.ServerBaseLimit.KeyRequestLimit</td>
+                        <td>@keyValuePair.Key</td>
+                        <td>@keyValuePair.Value</td>
+                    </tr>
+                }
+            }
+            </tbody>
+
+        </table>
+
+    </div>
+</div>

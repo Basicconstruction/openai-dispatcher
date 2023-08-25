@@ -1,7 +1,12 @@
 ﻿@model OpenKeyViewModel
-<h5 class="bg-light text-white text-center p-2">@Model.Action</h5>
-<form method="post" asp-action="Update">
+<h5 class="bg-light text-dark text-start p-2">@Model.Action</h5>
+<form method="post" asp-action="@Model.Action">
     <div asp-validation-summary="All" class="text-danger text-start"></div>
+    <div class="form-control">
+        <label asp-for="OpenKey.OpenKeyId"></label>
+        <input class="form-control" asp-for="OpenKey.OpenKeyId" readonly/>
+    </div>
+
     <div class="form-control">
         <label asp-for="OpenKey.Key"></label>
         <div>
@@ -15,7 +20,8 @@
             <span asp-validation-for="OpenKey.PricingMethod" class="text-danger"></span>
         </div>
 
-        <select class="form-control" asp-for="OpenKey.PricingMethod" disabled="@Model.ReadOnly" asp-items="@ViewBag.Methods">
+        <select class="form-control" asp-for="OpenKey.PricingMethod" disabled="@Model.ReadOnly"
+                asp-items="@Model.PricingSelector">
         </select>
     </div>
     <div class="form-control">
@@ -48,7 +54,8 @@
             <span asp-validation-for="OpenKey.KeyUserId" class="text-danger"></span>
         </div>
 
-        <select class="form-control" asp-for="OpenKey.KeyUserId" disabled="@Model.ReadOnly" asp-items="@ViewBag.Users"></select>
+        <select class="form-control" asp-for="OpenKey.KeyUserId" disabled="@Model.ReadOnly"
+                asp-items="@Model.KeyUserSelector"></select>
     </div>
     <div class="form-control">
         <label asp-for="OpenKey.Available"></label>
@@ -56,11 +63,11 @@
             <span asp-validation-for="OpenKey.Available" class="text-danger"></span>
         </div>
 
-        <select class="form-control" asp-for="OpenKey.Available" disabled="@Model.ReadOnly" asp-items="@ViewBag.Availables"></select>
+        <select class="form-control" asp-for="OpenKey.Available" disabled="@Model.ReadOnly" asp-items="@Model.AvailableSelector"></select>
     </div>
     @if (Model.ShowAction)
     {
-        <button class="accordion-button" type="submit">@Model.Action</button>
+        <button class="btn btn-secondary" type="submit">@Model.Action</button>
     }
-    <a class="btn btn-secondary" asp-action="Index"></a>
+    <a class="btn btn-secondary" asp-controller="OpenKey" asp-action="Index">Back</a>
 </form>

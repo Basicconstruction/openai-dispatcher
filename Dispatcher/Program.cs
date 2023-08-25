@@ -3,11 +3,14 @@ using Dispatcher.Endpoints;
 using Dispatcher.Filters;
 using Dispatcher.Middlewares.api;
 using Dispatcher.Models;
+using Dispatcher.Models.Entities;
+using Dispatcher.Models.Entities.Impl;
 using Dispatcher.Models.Requests;
 using Dispatcher.PreMiddleware;
 using Hangfire;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 
@@ -65,7 +68,13 @@ builder.Services.AddHangfireServer();
 builder.Services.AddControllersWithViews().AddRazorRuntimeCompilation();
 builder.Services.AddSingleton<KeyPoolRepository>();
 builder.Services.AddSingleton<DynamicTable>();
+builder.Services.AddScoped<IOpenKeyRepository, EFOpenKeyRepository>();
+builder.Services.AddScoped<IPoolKeyRepository, EFPoolKeyRepository>();
 builder.Services.AddMvc();
+builder.Services.Configure<MvcOptions>(opts =>
+{
+    opts.ModelBindingMessageProvider.SetValueMustNotBeNullAccessor(value=>"please enter a value");
+});
 
 var app = builder.Build();
 
