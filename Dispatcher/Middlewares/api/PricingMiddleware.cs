@@ -5,19 +5,19 @@ namespace Dispatcher.Middlewares.api;
 public class PricingMiddleware
 {
     private readonly RequestDelegate _next;
-    private readonly IServiceProvider _provider;
-    public PricingMiddleware(RequestDelegate next,IServiceProvider provider)
+    public PricingMiddleware(RequestDelegate next)
     {
         _next = next;
-        _provider = provider;
     }
 
-    public async Task InvokeAsync(HttpContext context)
+    public async Task InvokeAsync(HttpContext context,DataContext data)
     {
         await _next(context);
         var pickedKey = (OpenKey)context.Items["RequestKey"];
-        using var scope = _provider.CreateScope();
-        await using var data = scope.ServiceProvider.GetRequiredService<DataContext>();
+        // using var scope = _provider.CreateScope();
+
+        // await using var data = scope.ServiceProvider.GetRequiredService<DataContext>();
+        await context.Response.WriteAsync("Pricing "+data.GetHashCode());
         if (pickedKey == null)
         {
             return;

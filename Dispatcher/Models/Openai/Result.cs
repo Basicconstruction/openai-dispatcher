@@ -39,4 +39,12 @@ public class Completion
 
     [JsonProperty("choices")]
     public List<Choice>? Choices { get; set; }
+
+    public static Completion GetDefaultOrExample(string? content)
+    {
+        var json = "{\"id\":\"chatcmpl-7qFvNMxRuZTgRPGs4rjk3fMebsFSg\",\"object\":\"chat.completion.chunk\",\"created\":1692688625,\"model\":\"gpt-3.5-turbo-0301\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"\"},\"finish_reason\":null}]}";
+        var completion = JsonConvert.DeserializeObject<Completion>(json);
+        completion!.Choices![0].Delta!.Content = content;
+        return completion!;
+    }
 }

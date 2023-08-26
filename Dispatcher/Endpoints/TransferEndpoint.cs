@@ -8,7 +8,7 @@ namespace Dispatcher.Endpoints;
 
 public class TransferEndpoint
 {
-    public async Task Endpoint(HttpContext context,DataContext data,KeyPoolRepository repository)
+    public async Task Endpoint(HttpContext context,DataContext data,KeyPoolRepository repository,DynamicTable table)
     {
         // 对请求的验证可以放置在中间件。
         var path = context.Request.RouteValues["path"]?.ToString();//额外请求路径
@@ -18,7 +18,7 @@ public class TransferEndpoint
             await Error();
             return;
         }
-
+        await context.Response.WriteAsync("Process "+data.GetHashCode());
         async Task Error()
         {
             await context.Response.WriteAsync("服务器内部错误，找不到可用的池主机或者池key");
@@ -39,11 +39,7 @@ public class TransferEndpoint
         }
 
         var url = baseUrl+"/v1/"+path;//拼接代理地址
-        var requestBody = "";// 读取请求体
-        using (var reader = new StreamReader(context.Request.Body))
-        {
-            requestBody = await reader.ReadToEndAsync();
-        }
+        var requestBody = (string)(context.Items["body"] ?? "");
 
         using var client = new HttpClient();
         var request = new HttpRequestMessage(HttpMethod.Post, url);// 构建请求
@@ -75,6 +71,9 @@ public class TransferEndpoint
 
             data.SaveChanges();
         }
+        table.Log($"使用的私有池密钥Id： {poolKey.PoolKeyId}\n" +
+                  $"使用的主机是： {poolKey.HandHosts}" +
+                  $"密钥是： {poolKey.Cipher?[..7]}");
 
         var buffer = new byte[50];
         int bytesRead;

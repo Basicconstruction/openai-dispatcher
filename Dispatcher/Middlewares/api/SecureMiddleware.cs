@@ -11,16 +11,14 @@ public class SecureMiddleware
 {
     private DynamicTable _table;
     private readonly RequestDelegate _next;
-    private readonly IServiceProvider _provider;
 
-    public SecureMiddleware(RequestDelegate next,IServiceProvider provider,DynamicTable table)
+    public SecureMiddleware(RequestDelegate next,DynamicTable table)
     {
-        _provider = provider;
         _next = next;
         _table = table;
     }
 
-    public async Task Invoke(HttpContext context)
+    public async Task Invoke(HttpContext context,DataContext data)
     {
         var auth = context.Request.Headers.Authorization.ToString();
         if (auth.Length <= 7)
@@ -30,9 +28,9 @@ public class SecureMiddleware
             return;
         }
         var authKey = auth?[7..];
-        using var scope = _provider.CreateScope();
-        await using var data = scope.ServiceProvider.GetRequiredService<DataContext>();
-
+        // using var scope = _provider.CreateScope();
+        // await using var data = scope.ServiceProvider.GetRequiredService<DataContext>();
+        await context.Response.WriteAsync("Secure "+data.GetHashCode());
         async Task KeyNotAllow()
         {
             await new TestTransferEndpoint().Endpoint(context);// 如果不是我们签发的，直接返回fake gpt

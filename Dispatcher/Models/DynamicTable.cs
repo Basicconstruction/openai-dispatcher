@@ -1,4 +1,5 @@
-﻿using Dispatcher.Models.Requests;
+﻿using System.Globalization;
+using Dispatcher.Models.Requests;
 using Microsoft.Extensions.Options;
 
 namespace Dispatcher.Models;
@@ -16,6 +17,12 @@ public class DynamicTable
 
     public volatile HashSet<string> NotAllowKeys = new HashSet<string>();
 
+    public volatile List<string> UseInfo = new List<string>();
+
+    public void Log(string log)
+    {
+        UseInfo.Add(DateTime.Now.ToString(CultureInfo.InvariantCulture)+" "+log);
+    }
     public void PutNotAllowKey(string key)
     {
         NotAllowKeys.Add(key);

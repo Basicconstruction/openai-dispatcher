@@ -98,16 +98,19 @@ app.UseHangfireDashboard("/dashboard",new DashboardOptions{
 
 app.Map("/v1", apiApp =>
 {
+    //apiApp.UseMiddleware<TestMiddleware>();
     apiApp.UseMiddleware<RosterMiddleware>();
-    apiApp.UseMiddleware<SecureMiddleware>(app.Services);
+    apiApp.UseMiddleware<SecureMiddleware>();
+    apiApp.UseMiddleware<ModelFilterMiddleware>();
     apiApp.UseMiddleware<RequestChooserMiddleware>();
-    apiApp.UseMiddleware<PricingMiddleware>(app.Services);
-    apiApp.UseEndpoints(endpoints => { endpoints.MapPost("v1/{*path}", new TransferEndpoint().Endpoint); });
+    apiApp.UseMiddleware<PricingMiddleware>();
+    apiApp.UseEndpoints(endpoints =>
+        { endpoints.MapPost("v1/{*path}", new TransferEndpoint().Endpoint); });
 });
 app.Map("/test/v1", apiApp =>
 {
-    apiApp.UseMiddleware<SecureMiddleware>(app.Services);
-    apiApp.UseMiddleware<PricingMiddleware>(app.Services);
+    apiApp.UseMiddleware<SecureMiddleware>();
+    apiApp.UseMiddleware<PricingMiddleware>();
     apiApp.UseEndpoints(endpoints => { endpoints.MapPost("test/v1/{*path}", new TestTransferEndpoint().Endpoint); });
 });
 app.UseEndpoints(endpoints =>
@@ -130,9 +133,10 @@ var table = app.Services.GetRequiredService<DynamicTable>();
 using var scope = app.Services.CreateScope();
 await using var context = scope.ServiceProvider.GetRequiredService<DataContext>();
 var syncer = new Syncer(context,repository);
+
 RecurringJob.AddOrUpdate("easyJob",
     () => table.Reset(), Cron.Minutely);
 RecurringJob.AddOrUpdate("fetchKey",()=> syncer.UpdateDynamicKeys(),Cron.Minutely);
 await SeedIdentityUser.Ensure(app);
-
+RecurringJob.TriggerJob("fetchKey");
 app.Run();
