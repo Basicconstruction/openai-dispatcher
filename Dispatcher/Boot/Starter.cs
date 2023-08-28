@@ -23,6 +23,6 @@ public class Starter
     {
         using var scope = _provider.CreateScope();
         using var data = scope.ServiceProvider.GetRequiredService<DataContext>();
-        _repository.PoolKeys = data.PoolKeys.Where(p=>p.Available==true).ToList();
+        _repository.Transfer(data.PoolKeys.Where(p=>p.Available==true).ToList());
     }
 }

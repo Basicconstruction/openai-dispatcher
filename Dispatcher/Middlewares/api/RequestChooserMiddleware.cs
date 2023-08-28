@@ -26,7 +26,7 @@ public class RequestChooserMiddleware
             return;
         }
         var index = random.Next(_repository.Count);
-        var pickedKey = _repository.PoolKeys?[index];
+        var pickedKey = _repository.OpenPoolKeys[index];
         if (pickedKey?.Available == false)
         {
             var completion = Completion.GetDefaultOrExample("数据异常，请联系管理员！");

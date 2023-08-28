@@ -19,6 +19,8 @@ public class Syncer
     }
     public void UpdateDynamicKeys()
     {
-        _repository.PoolKeys = _context?.PoolKeys.Where(p=>p.Available==true).ToList();
+        _repository.Transfer(_context?.PoolKeys.Where(p=>p.Available==true).ToList());
+        // _repository.Transfer(_context?.PoolKeys.Where(p=>p.Available==true).ToList());
+        // _repository.PoolKeys = _context?.PoolKeys.Where(p=>p.Available==true).ToList();
     }
 }

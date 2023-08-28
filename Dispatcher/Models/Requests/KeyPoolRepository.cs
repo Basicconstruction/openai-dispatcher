@@ -3,14 +3,37 @@
 // 内存表
 public class KeyPoolRepository
 {
-    public volatile List<PoolKey>? PoolKeys = new();
+    private readonly object _o = new();
+
+    public List<PoolKey> OpenPoolKeys
+    {
+        get
+        {
+            lock (_o)
+            {
+                return _poolKeys;
+            }
+        }
+    }
+
+    public void Transfer(List<PoolKey>? poolKeys)
+    {
+        OpenPoolKeys.Clear();
+        if (poolKeys == null)
+        {
+            return;
+        }
+
+        OpenPoolKeys.AddRange(poolKeys);
+    }
+    private volatile List<PoolKey> _poolKeys = new();
 
     public void RemovePoolKey(PoolKey poolKey)
     {
-        PoolKeys?.Remove(poolKey);
+        OpenPoolKeys.Remove(poolKey);
     }
     // public List<PoolKey> CanNotUseKeys { get; set; } = new();
-    public int Count => PoolKeys?.Count??0;
+    public int Count => OpenPoolKeys.Count;
 
     // public void Clear()
     // {
@@ -19,17 +42,14 @@ public class KeyPoolRepository
 
     public void Add(PoolKey key)
     {
-        if (PoolKeys != null)
+        var poolKey = OpenPoolKeys.FirstOrDefault(p => p.PoolKeyId == key.PoolKeyId);
+        if (poolKey == null)
         {
-            var poolKey = PoolKeys.FirstOrDefault(p => p.PoolKeyId == key.PoolKeyId);
-            if (poolKey == null)
-            {
-                PoolKeys.Add(key);
-            }
-            else
-            {
-                poolKey.CopyFrom(poolKey);
-            }
+            OpenPoolKeys.Add(key);
+        }
+        else
+        {
+            poolKey.CopyFrom(poolKey);
         }
     }
 
