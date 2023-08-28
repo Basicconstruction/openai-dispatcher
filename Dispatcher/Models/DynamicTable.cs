@@ -11,13 +11,13 @@ public class DynamicTable
     {
         _serverBaseLimit = options.Value;
     }
-    public volatile Dictionary<string, int> KeyAvailable = new Dictionary<string, int>();
+    public volatile Dictionary<string, int> KeyAvailable = new();
 
-    public volatile Dictionary<string, int> IpAvailable = new Dictionary<string, int>();
+    public volatile Dictionary<string, int> IpAvailable = new();
 
-    public volatile HashSet<string> NotAllowKeys = new HashSet<string>();
+    private volatile HashSet<string> _notAllowKeys = new();
 
-    public volatile List<string> UseInfo = new List<string>();
+    public volatile List<string> UseInfo = new();
 
     public void Log(string log)
     {
@@ -25,7 +25,7 @@ public class DynamicTable
     }
     public void PutNotAllowKey(string key)
     {
-        NotAllowKeys.Add(key);
+        _notAllowKeys.Add(key);
     }
 
     public int ServerServeAvailable = 1;
@@ -38,7 +38,7 @@ public class DynamicTable
 
     public bool IsNotAllowKey(string key)
     {
-        return NotAllowKeys.Contains(key);
+        return _notAllowKeys.Contains(key);
     }
     public int Accept(string key, string ip)
     {
@@ -49,7 +49,7 @@ public class DynamicTable
 
         ServerServeAvailable--;
 
-        if (NotAllowKeys.Contains(key))
+        if (_notAllowKeys.Contains(key))
         {
             return KeyIsNotAllow;
         }
@@ -90,7 +90,7 @@ public class DynamicTable
         {
             KeyAvailable[keyPair.Key] = _serverBaseLimit.KeyRequestLimit;
         }
-        NotAllowKeys.Clear();
+        _notAllowKeys.Clear();
 
         ServerServeAvailable = _serverBaseLimit.ServerServeLimit;
     }

@@ -30,7 +30,7 @@ public class SecureMiddleware
         var authKey = auth?[7..];
         // using var scope = _provider.CreateScope();
         // await using var data = scope.ServiceProvider.GetRequiredService<DataContext>();
-        await context.Response.WriteAsync("Secure "+data.GetHashCode());
+        //await context.Response.WriteAsync("Secure "+data.GetHashCode());
         async Task KeyNotAllow()
         {
             await new TestTransferEndpoint().Endpoint(context);// 如果不是我们签发的，直接返回fake gpt

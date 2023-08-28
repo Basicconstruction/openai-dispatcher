@@ -72,7 +72,8 @@ builder.Services.AddSingleton<KeyPoolRepository>();
 builder.Services.AddSingleton<DynamicTable>();
 builder.Services.AddScoped<IOpenKeyRepository, EFOpenKeyRepository>();
 builder.Services.AddScoped<IPoolKeyRepository, EFPoolKeyRepository>();
-builder.Services.AddMvc();
+builder.Services.AddSingleton<Syncer>();
+builder.Services.AddSingleton<Starter>();
 builder.Services.Configure<MvcOptions>(opts =>
 {
     opts.ModelBindingMessageProvider.SetValueMustNotBeNullAccessor(value=>"please enter a value");
@@ -127,16 +128,10 @@ app.MapControllerRoute(
 app.UseSwagger();
 app.UseSwaggerUI(opts => { opts.SwaggerEndpoint("/swagger/v1/swagger.json", "ws"); });
 AutoMigration.Migration(app);
-KeyPoolRepository repository = app.Services.GetRequiredService<KeyPoolRepository>();
-var starter = new Starter(app.Services, repository);
-var table = app.Services.GetRequiredService<DynamicTable>();
-using var scope = app.Services.CreateScope();
-await using var context = scope.ServiceProvider.GetRequiredService<DataContext>();
-var syncer = new Syncer(context,repository);
-
-RecurringJob.AddOrUpdate("easyJob",
-    () => table.Reset(), Cron.Minutely);
-RecurringJob.AddOrUpdate("fetchKey",()=> syncer.UpdateDynamicKeys(),Cron.Minutely);
+BackgroundJob.Enqueue<Starter>(starter => starter.Init());
+RecurringJob.AddOrUpdate<DynamicTable>("easyJob",
+    table => table.Reset(), Cron.Minutely);
+RecurringJob.AddOrUpdate<Syncer>("fetchKey",syncer=> syncer.UpdateDynamicKeys(),Cron.Minutely);
 await SeedIdentityUser.Ensure(app);
 RecurringJob.TriggerJob("fetchKey");
 app.Run();

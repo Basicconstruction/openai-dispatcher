@@ -21,10 +21,16 @@ public class AdminPage : PageModel
         set;
     }
 
-    public AdminPage(DataContext context,DynamicTable table,IOptions<ServerBaseLimit> options)
+    public KeyPoolRepository Repository
+    {
+        get;
+        set;
+    }
+    public AdminPage(DataContext context,DynamicTable table,IOptions<ServerBaseLimit> options,KeyPoolRepository repository)
     {
         Table = table;
         ServerBaseLimit = options.Value;
+        Repository = repository;
     }
     public void OnGet()
     {

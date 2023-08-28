@@ -17,7 +17,6 @@ public class RosterMiddleware
     public async Task InvokeAsync(HttpContext context)
     {
         var headers = context.Request.Headers;
-        //await context.Response.WriteAsync($"{context.Request.Headers.Detail()}");
         string ip = "";
         if (!headers.ContainsKey("ip"))
         {

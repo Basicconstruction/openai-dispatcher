@@ -3,7 +3,7 @@
 <h2>登录状态： @if (Model != null)
           {
               @:"已登录"
-              @:$"用户名{@Model}"
+              @:"用户名" @Model
           }
           else
           {
@@ -11,7 +11,6 @@
           }
     </h2>
 <div class="row">
-    <div><a asp-controller="Account" asp-action="Login" >去登陆</a></div>
     <div><a asp-controller="Account" asp-action="Logout">去注销</a></div>
     <div><a asp-controller="Account" asp-action="ChangePassword">修改密码</a></div>
 </div>

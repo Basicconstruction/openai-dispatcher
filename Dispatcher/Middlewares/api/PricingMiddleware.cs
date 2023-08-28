@@ -17,7 +17,7 @@ public class PricingMiddleware
         // using var scope = _provider.CreateScope();
 
         // await using var data = scope.ServiceProvider.GetRequiredService<DataContext>();
-        await context.Response.WriteAsync("Pricing "+data.GetHashCode());
+        //await context.Response.WriteAsync("Pricing "+data.GetHashCode());
         if (pickedKey == null)
         {
             return;

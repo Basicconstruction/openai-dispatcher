@@ -18,7 +18,7 @@ public class TransferEndpoint
             await Error();
             return;
         }
-        await context.Response.WriteAsync("Process "+data.GetHashCode());
+        //await context.Response.WriteAsync("Process "+data.GetHashCode());
         async Task Error()
         {
             await context.Response.WriteAsync("服务器内部错误，找不到可用的池主机或者池key");

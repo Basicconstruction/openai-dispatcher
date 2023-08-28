@@ -28,31 +28,14 @@
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
   </ItemGroup>
 
-
-
-
   <ItemGroup>
     <AdditionalFiles Include="Pages\Shared\Error.cshtml" />
     <AdditionalFiles Include="Pages\Shared\_Layout.cshtml" />
     <AdditionalFiles Include="Pages\Shared\_ValidationScriptsPartial.cshtml" />
-
-
-
-
   </ItemGroup>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  <ItemGroup>
+    <Folder Include="Views\Admin\" />
+  </ItemGroup>
+  
 </Project>

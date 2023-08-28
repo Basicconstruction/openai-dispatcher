@@ -7,7 +7,7 @@ namespace Dispatcher.Controllers;
 [ApiController]
 [Authorize]
 [Route("admin/[controller]")]
-public class StatusController
+public class StatusController: Controller
 {
     private DynamicTable _table;
 

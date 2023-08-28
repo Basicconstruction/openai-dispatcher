@@ -18,7 +18,7 @@ public class LoginModel
         set;
     }
 
-    public string ReturnUrl
+    public string? ReturnUrl
     {
         get;
         set;

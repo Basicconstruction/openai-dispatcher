@@ -1,4 +1,6 @@
-﻿using Dispatcher.Models;
+﻿using Dispatcher.FakeGpt;
+using Dispatcher.Models;
+using Dispatcher.Models.Openai;
 using Dispatcher.Models.Requests;
 
 namespace Dispatcher.Middlewares.api;
@@ -17,7 +19,20 @@ public class RequestChooserMiddleware
     public async Task InvokeAsync(HttpContext context)
     {
         var random = new Random();
-        var pickedKey = _repository.PoolKeys[random.Next(_repository.Count)];
+        if (_repository.Count < 1)
+        {
+            var completion = Completion.GetDefaultOrExample("当前动态池中没有实际请求密钥，请重试。（程序错误）");
+            await GptReply.Reply(context,completion);
+            return;
+        }
+        var index = random.Next(_repository.Count);
+        var pickedKey = _repository.PoolKeys?[index];
+        if (pickedKey?.Available == false)
+        {
+            var completion = Completion.GetDefaultOrExample("数据异常，请联系管理员！");
+            await GptReply.Reply(context,completion);
+            return;
+        }
         context.Items["PickedKey"] = pickedKey;
         await _next(context);
     }

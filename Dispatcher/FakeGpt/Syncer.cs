@@ -5,16 +5,20 @@ namespace Dispatcher.FakeGpt;
 
 public class Syncer
 {
-    private DataContext _context;
-    private KeyPoolRepository _repository;
+    private DataContext? _context;
+    // private IServiceProvider _provider;
+    private readonly KeyPoolRepository _repository;
 
-    public Syncer(DataContext context,KeyPoolRepository repository)
+    public Syncer(IServiceProvider serviceProvider,KeyPoolRepository repository)
     {
+        // _context = context;
+        var scope = serviceProvider?.CreateScope();
+        var context = scope?.ServiceProvider.GetRequiredService<DataContext>();
         _context = context;
         _repository = repository;
     }
     public void UpdateDynamicKeys()
     {
-        _repository.PoolKeys = _context.PoolKeys.Where(p=>p.Available==true).ToList();
+        _repository.PoolKeys = _context?.PoolKeys.Where(p=>p.Available==true).ToList();
     }
 }
