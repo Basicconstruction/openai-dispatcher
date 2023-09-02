@@ -9,20 +9,19 @@ public class RequestChooserMiddleware
 {
     private readonly RequestDelegate _next;
     private readonly KeyPoolRepository _repository;
-    private readonly ServerBaseLimit _limit;
-    public RequestChooserMiddleware(RequestDelegate next,KeyPoolRepository repository,ServerBaseLimit serverBaseLimit)
+    public RequestChooserMiddleware(RequestDelegate next,KeyPoolRepository repository)
     {
         _next = next;
         _repository = repository;
-        _limit = serverBaseLimit;
+        
     }
 
-    public async Task InvokeAsync(HttpContext context)
+    public async Task InvokeAsync(HttpContext context, ServerBaseLimit limit)
     {
         var random = new Random();
         if (_repository.Count < 1)
         {
-            var delayParts = _limit.WaitSeconds * 1000 / 10;
+            var delayParts = limit.WaitSeconds * 1000 / 10;
             var part = 0;
             while (part <= 10 && _repository.Count < 1)
             {
@@ -32,7 +31,7 @@ public class RequestChooserMiddleware
 
             if (_repository.Count < 1)
             {
-                var completion = Completion.GetDefaultOrExample($"已经等待{_limit.WaitSeconds}秒\n" +
+                var completion = Completion.GetDefaultOrExample($"已经等待{limit.WaitSeconds}秒\n" +
                                                                 $"当前动态池中没有实际请求密钥，请重试。（程序错误）"+
                                                                 $"\n这往往是因为IIS的应用程序池正在重新启动导致的，IIS会在长时间没有请求时，回收应用程序池。" +
                                                                 $"\n 不过，随着当前请求，应用程序池将会重新启动，请耐心等待或者重新请求。" +
