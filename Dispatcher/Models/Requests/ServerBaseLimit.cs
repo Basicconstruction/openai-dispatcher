@@ -20,4 +20,10 @@ public class ServerBaseLimit
         get;
         set;
     } = 40;
+
+    public int WaitSeconds
+    {
+        get;
+        set;
+    } = 5;
 }

@@ -9,9 +9,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="AngleSharp" Version="1.0.4" />
     <PackageReference Include="Hangfire.Core" Version="1.8.5" />
     <PackageReference Include="Hangfire.SqlServer" Version="1.8.5" />
 	<PackageReference Include="Hangfire.AspNetCore" Version="1.8.*" />
+	<PackageReference Include="HtmlAgilityPack" Version="1.11.52" />
 	<PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="6.0.21" />
 	<PackageReference Include="Microsoft.Data.SqlClient" Version="*" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.Extensions" Version="6.0.21" />

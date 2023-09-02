@@ -1,8 +1,12 @@
 ﻿using System.Net.Http.Headers;
 using System.Text;
+using Dispatcher.Endpoints.Worker;
 using Dispatcher.Models;
-using System;
+using Dispatcher.FakeGpt;
+using Dispatcher.Models.Openai;
 using Dispatcher.Models.Requests;
+using HtmlAgilityPack;
+using Newtonsoft.Json;
 
 namespace Dispatcher.Endpoints;
 
@@ -18,7 +22,6 @@ public class TransferEndpoint
             await Error();
             return;
         }
-        //await context.Response.WriteAsync("Process "+data.GetHashCode());
         async Task Error()
         {
             await context.Response.WriteAsync("服务器内部错误，找不到可用的池主机或者池key");
@@ -41,6 +44,26 @@ public class TransferEndpoint
         var url = baseUrl+"/v1/"+path;//拼接代理地址
         var requestBody = (string)(context.Items["body"] ?? "");
 
+        var easy = JsonConvert.DeserializeObject<EasyModel>(requestBody);
+        var last = easy.Messages.Last().Content.Trim();
+        if (last.EndsWith("?") || last.EndsWith("？"))
+        {
+            var newTemplate = await BingSearch.GetContentAsync(context,last);
+            var model = JsonConvert.DeserializeObject<EasyModel>(requestBody);
+            model!.Messages.Last().Content = newTemplate;
+            newTemplate = JsonConvert.SerializeObject(model);
+            await ContinueWithRaw(url, poolKey,newTemplate, context, data, repository, table);
+        }
+        else
+        {
+            await ContinueWithRaw(url, poolKey, requestBody, context, data, repository, table);
+        }
+
+    }
+
+    public static async Task ContinueWithRaw(string url,PoolKey poolKey,string requestBody,HttpContext context,
+        DataContext data,KeyPoolRepository repository,DynamicTable table)
+    {
         using var client = new HttpClient();
         var request = new HttpRequestMessage(HttpMethod.Post, url);// 构建请求
         client.DefaultRequestHeaders.Add("Authorization",$"Bearer {poolKey.Cipher}");
@@ -49,16 +72,6 @@ public class TransferEndpoint
         // 添加请求体和请求头
         var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
         var contentStream = await response.Content.ReadAsStreamAsync();
-
-        // 设置转发响应的Content-Type头
-        try
-        {
-            context.Response.ContentType = response.Content.Headers.ContentType.ToString();
-        }
-        catch
-        {//ignore
-
-        }
 
         if ((int)response.StatusCode != StatusCodes.Status200OK)
         {
@@ -69,11 +82,24 @@ public class TransferEndpoint
                 dk.Available = false;
             }
 
-            data.SaveChanges();
+            await data.SaveChangesAsync();
+        }
+        try
+        {
+            if (!context.Response.Headers.ContainsKey("Content-Type"))
+            {
+                context.Response.ContentType =
+                response.Content.Headers.ContentType.ToString();
+            }
+        }
+        catch
+        {//ignore
+
         }
         table.Log($"使用的私有池密钥Id： {poolKey.PoolKeyId}\n" +
                   $"使用的主机是： {poolKey.HandHosts}" +
                   $"密钥是： {poolKey.Cipher?[..7]}");
+
 
         var buffer = new byte[50];
         int bytesRead;
@@ -82,9 +108,5 @@ public class TransferEndpoint
             await context.Response.Body.WriteAsync(buffer, 0, bytesRead);
             await context.Response.Body.FlushAsync();
         }
-        // var originalContent = await response.Content.ReadAsStringAsync();
-        // context.Response.ContentType = response!.Content!.Headers!.ContentType!.ToString();
-        // await context.Response.WriteAsync(originalContent);
-
     }
 }

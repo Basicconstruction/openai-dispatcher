@@ -100,6 +100,7 @@ app.UseHangfireDashboard("/dashboard",new DashboardOptions{
 app.Map("/v1", apiApp =>
 {
     //apiApp.UseMiddleware<TestMiddleware>();
+
     apiApp.UseMiddleware<RosterMiddleware>();
     apiApp.UseMiddleware<SecureMiddleware>();
     apiApp.UseMiddleware<ModelFilterMiddleware>();
@@ -133,5 +134,8 @@ RecurringJob.AddOrUpdate<DynamicTable>("easyJob",
     table => table.Reset(), Cron.Minutely);
 RecurringJob.AddOrUpdate<Syncer>("fetchKey",syncer=> syncer.UpdateDynamicKeys(),Cron.Minutely);
 await SeedIdentityUser.Ensure(app);
-RecurringJob.TriggerJob("fetchKey");
+if (!app.Environment.IsDevelopment())
+{
+    RecurringJob.TriggerJob("fetchKey");
+}
 app.Run();
