@@ -1,7 +1,32 @@
 ﻿using System.Net;
 using System.Text;
+using System.Text.RegularExpressions;
 using AngleSharp;
 using HtmlAgilityPack;
+
+var sf = "fsdf sfsdlf";
+var f = sf.Split(" ");
+foreach (var s in f)
+{
+    Console.WriteLine(s);
+}
+// string input = "https://api.sdfsf.comsk-sfhsdlffsdfej";
+// string pattern = @"(https?://[^/]+)(.*)sk-(.*)";
+//
+// Match match = Regex.Match(input, pattern);
+//
+// if (match.Success)
+// {
+//     string link = match.Groups[1].Value;
+//     string rest = match.Groups[3].Value;
+//
+//     Console.WriteLine("Link: " + link);
+//     Console.WriteLine("Rest: " + rest);
+// }
+// else
+// {
+//     Console.WriteLine("Invalid input string.");
+// }
 
 // HttpClient client = new HttpClient();
 //
@@ -45,50 +70,50 @@ using HtmlAgilityPack;
 // // Display the response
 // Console.WriteLine(responseContent);
 
-var searchQuery = "java之父"; // 替换为你想要搜索的内容
-var url = $"https://www.bing.com/search?q={Uri.EscapeDataString(searchQuery)}&PC=U316&FORM=CHROMN";
-
-var httpClientHandler = new HttpClientHandler
-{
-    AllowAutoRedirect = false // 禁止自动重定向
-};
-
-using (var client = new HttpClient(httpClientHandler))
-{
-    var response = await client.GetAsync(url);
-    if (response.StatusCode == HttpStatusCode.Redirect)
-    {
-        var redirectUrl = response.Headers.Location.ToString();
-        response = await client.GetAsync(redirectUrl);
-    }
-
-    var content = await response.Content.ReadAsStringAsync();
-    var doc = new HtmlDocument();
-    doc.LoadHtml(content);
-
-
-    // 获取id为b_results的ol元素
-    var olElement = doc.GetElementbyId("b_results");
-
-    if (olElement != null)
-    {
-        // 获取ol元素下class包含b_algo的所有li元素
-        var liElements = olElement.SelectNodes(".//li[contains(@class, 'b_algo') or contains(@class, 'bg_ans')]");
-
-        if (liElements != null)
-        {
-            foreach (var liElement in liElements)
-            {
-                // 获取li元素内部的文本内容
-                var textContent = liElement.InnerText.Trim();
-
-                // 如果文本内容不为空，则进行处理
-                if (!string.IsNullOrEmpty(textContent))
-                {
-                    // 处理文本内容
-                    Console.WriteLine(textContent);
-                }
-            }
-        }
-    }
-}
+// var searchQuery = "java之父"; // 替换为你想要搜索的内容
+// var url = $"https://www.bing.com/search?q={Uri.EscapeDataString(searchQuery)}&PC=U316&FORM=CHROMN";
+//
+// var httpClientHandler = new HttpClientHandler
+// {
+//     AllowAutoRedirect = false // 禁止自动重定向
+// };
+//
+// using (var client = new HttpClient(httpClientHandler))
+// {
+//     var response = await client.GetAsync(url);
+//     if (response.StatusCode == HttpStatusCode.Redirect)
+//     {
+//         var redirectUrl = response.Headers.Location.ToString();
+//         response = await client.GetAsync(redirectUrl);
+//     }
+//
+//     var content = await response.Content.ReadAsStringAsync();
+//     var doc = new HtmlDocument();
+//     doc.LoadHtml(content);
+//
+//
+//     // 获取id为b_results的ol元素
+//     var olElement = doc.GetElementbyId("b_results");
+//
+//     if (olElement != null)
+//     {
+//         // 获取ol元素下class包含b_algo的所有li元素
+//         var liElements = olElement.SelectNodes(".//li[contains(@class, 'b_algo') or contains(@class, 'bg_ans')]");
+//
+//         if (liElements != null)
+//         {
+//             foreach (var liElement in liElements)
+//             {
+//                 // 获取li元素内部的文本内容
+//                 var textContent = liElement.InnerText.Trim();
+//
+//                 // 如果文本内容不为空，则进行处理
+//                 if (!string.IsNullOrEmpty(textContent))
+//                 {
+//                     // 处理文本内容
+//                     Console.WriteLine(textContent);
+//                 }
+//             }
+//         }
+//     }
+// }

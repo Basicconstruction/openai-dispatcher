@@ -20,14 +20,21 @@ public class ModelFilterMiddleware
             requestBody = await reader.ReadToEndAsync();
         }
 
-        var requestModel = JsonConvert.DeserializeObject<EasyModel>(requestBody);
-        var model = requestModel?.Model;
-        if (model != null && model.Contains("gpt-4"))
+        if ((bool)(context.Items["Free"] ?? false))
         {
-             var completion = Completion.GetDefaultOrExample($"当前请求的模型是{model},但是该模型消耗的金额较大。" +
-                                                             $"为了保证长久使用，在该站点，该模型被禁用");
-            await GptReply.Reply(context,completion);
-            return;
+            // 不限制模型
+        }
+        else
+        {
+            var requestModel = JsonConvert.DeserializeObject<EasyModel>(requestBody);
+            var model = requestModel?.Model;
+            if (model != null && model.Contains("gpt-4"))
+            {
+                var completion = Completion.GetDefaultOrExample($"当前请求的模型是{model},但是该模型消耗的金额较大。" +
+                                                                $"为了保证长久使用，在该站点，该模型被禁用");
+                await GptReply.Reply(context,completion);
+                return;
+            }
         }
 
         context.Items["body"] = requestBody;

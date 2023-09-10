@@ -73,7 +73,7 @@ public class TransferEndpoint
         var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
         var contentStream = await response.Content.ReadAsStreamAsync();
 
-        if ((int)response.StatusCode != StatusCodes.Status200OK)
+        if ((int)response.StatusCode != StatusCodes.Status200OK&&(!(poolKey.PoolKeyId == long.MaxValue)))
         {
             var dk = data.PoolKeys.Where(p => p.PoolKeyId == poolKey.PoolKeyId).FirstOrDefault();
             if (dk != null)
@@ -96,9 +96,17 @@ public class TransferEndpoint
         {//ignore
 
         }
-        table.Log($"使用的私有池密钥Id： {poolKey.PoolKeyId}\n" +
-                  $"使用的主机是： {poolKey.HandHosts}" +
-                  $"密钥是： {poolKey.Cipher?[..7]}");
+
+        if (poolKey.PoolKeyId == long.MaxValue)
+        {
+
+        }
+        else
+        {
+            table.Log($"使用的私有池密钥Id： {poolKey.PoolKeyId}\n" +
+                      $"使用的主机是： {poolKey.HandHosts}" +
+                      $"密钥是： {poolKey.Cipher?[..7]}");
+        }
 
 
         var buffer = new byte[50];

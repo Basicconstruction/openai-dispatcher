@@ -13,24 +13,24 @@ public class PricingMiddleware
     public async Task InvokeAsync(HttpContext context,DataContext data)
     {
         await _next(context);
-        var pickedKey = (OpenKey)context.Items["RequestKey"];
-        // using var scope = _provider.CreateScope();
-
-        // await using var data = scope.ServiceProvider.GetRequiredService<DataContext>();
-        //await context.Response.WriteAsync("Pricing "+data.GetHashCode());
-        if (pickedKey == null)
+        if ((bool)(context.Items["Free"] ?? false))
         {
-            return;
+            // 不计费
         }
-
-        var key = data.OpenKeys.FirstOrDefault(key => key.OpenKeyId == pickedKey.OpenKeyId);
-        if (key != null)
+        else
         {
-            key.AvailableRequest -= 1;
-            await data.SaveChangesAsync();
-        }
-        //await context.Response.WriteAsync((context.Items["PickedKey"] ?? "").ToString() ?? string.Empty);
-        //await context.Response.WriteAsync("appended");
+            var pickedKey = (OpenKey)context.Items["RequestKey"];
+            if (pickedKey == null)
+            {
+                return;
+            }
 
+            var key = data.OpenKeys.FirstOrDefault(key => key.OpenKeyId == pickedKey.OpenKeyId);
+            if (key != null)
+            {
+                key.AvailableRequest -= 1;
+                await data.SaveChangesAsync();
+            }
+        }
     }
 }

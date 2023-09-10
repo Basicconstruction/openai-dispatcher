@@ -2,5 +2,7 @@
 
 public class RunConfiguration
 {
-    
+    public volatile bool OpenForPublic = true;
+
+
 }

@@ -26,6 +26,10 @@ builder.Services.Configure<ServerBaseLimit>(opts =>
     opts.IpRequestLimit = 40;
     opts.KeyRequestLimit = 40;
 });
+builder.Services.Configure<RunConfiguration>(opts =>
+{
+    opts.OpenForPublic = true;
+});
 builder.Services.AddSwaggerGen(opts =>
 {
     opts.SwaggerDoc("v1", new OpenApiInfo()
@@ -139,3 +143,81 @@ if (!app.Environment.IsDevelopment())
     RecurringJob.TriggerJob("fetchKey");
 }
 app.Run();
+
+//{
+//  "profiles": {
+//    "Dispatcher": {
+//      "commandName": "Project",
+//      "launchBrowser": true,
+//      "environmentVariables": {
+//        "ASPNETCORE_ENVIRONMENT": "Development"
+//      },
+//      "dotnetRunMessages": true,
+//      "applicationUrl": "https://localhost:7175;http://localhost:5191"
+//    },
+//    "IIS Express": {
+//      "commandName": "IISExpress",
+//      "launchBrowser": true,
+//      "environmentVariables": {
+//        "ASPNETCORE_ENVIRONMENT": "Development"
+//      }
+//    },
+//    "Docker": {
+//      "commandName": "Docker",
+//      "launchBrowser": true,
+//      "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}",
+//      "publishAllPorts": true,
+//      "useSSL": true
+//    }
+//  },
+//  "iisSettings": {
+//    "windowsAuthentication": false,
+//    "anonymousAuthentication": true,
+//    "iisExpress": {
+//      "applicationUrl": "http://localhost:17460",
+//      "sslPort": 44343
+//    }
+//  }
+//}
+
+
+
+
+
+
+//
+// {
+//     "profiles": {
+//         "Dispatcher": {
+//             "commandName": "Project",
+//             "launchBrowser": true,
+//             "environmentVariables": {
+//                 "ASPNETCORE_ENVIRONMENT": "Production"
+//             },
+//             "dotnetRunMessages": true,
+//             "applicationUrl": "https://localhost:7175;http://localhost:5191"
+//         },
+//         "IIS Express": {
+//             "commandName": "IISExpress",
+//             "launchBrowser": true,
+//             "environmentVariables": {
+//                 "ASPNETCORE_ENVIRONMENT": "Production"
+//             }
+//         },
+//         "Docker": {
+//             "commandName": "Docker",
+//             "launchBrowser": true,
+//             "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}",
+//             "publishAllPorts": true,
+//             "useSSL": true
+//         }
+//     },
+//     "iisSettings": {
+//         "windowsAuthentication": false,
+//         "anonymousAuthentication": true,
+//         "iisExpress": {
+//             "applicationUrl": "http://localhost:17460",
+//             "sslPort": 44343
+//         }
+//     }
+// }

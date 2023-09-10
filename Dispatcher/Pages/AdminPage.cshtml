@@ -98,7 +98,14 @@
     {
         <tr>
             <td>@i</td>
-            <td>@Model.Repository.OpenPoolKeys[i].Cipher?[..7]</td>
+                @if (Model.Repository.OpenPoolKeys[i].Cipher != null)
+                {
+                    @if (Model.Repository.OpenPoolKeys[i].Cipher.Length >= 7)
+                    {
+                        <td>@Model.Repository.OpenPoolKeys[i].Cipher?[..7]</td>
+                    }
+                }
+                
         </tr>
     }
     </tbody>

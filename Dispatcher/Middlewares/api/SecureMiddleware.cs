@@ -1,6 +1,10 @@
-﻿using Dispatcher.Endpoints;
+﻿using System.Text.RegularExpressions;
+using Dispatcher.Endpoints;
 using Dispatcher.FakeGpt;
 using Dispatcher.Models;
+using Dispatcher.Models.Requests;
+using Microsoft.CodeAnalysis;
+using Microsoft.Extensions.Options;
 
 namespace Dispatcher.Middlewares.api;
 
@@ -11,14 +15,16 @@ public class SecureMiddleware
 {
     private DynamicTable _table;
     private readonly RequestDelegate _next;
+    private readonly RunConfiguration _configuration;
 
-    public SecureMiddleware(RequestDelegate next,DynamicTable table)
+    public SecureMiddleware(RequestDelegate next,DynamicTable table,IOptions<RunConfiguration> confs)
     {
+        _configuration = confs.Value;
         _next = next;
         _table = table;
     }
 
-    public async Task Invoke(HttpContext context,DataContext data)
+    public async Task Invoke(HttpContext context, DataContext data)
     {
         var auth = context.Request.Headers.Authorization.ToString();
         if (auth.Length <= 7)
@@ -28,13 +34,11 @@ public class SecureMiddleware
             return;
         }
         var authKey = auth?[7..];
-        // using var scope = _provider.CreateScope();
-        // await using var data = scope.ServiceProvider.GetRequiredService<DataContext>();
-        //await context.Response.WriteAsync("Secure "+data.GetHashCode());
-        async Task KeyNotAllow()
+        async Task KeyNotAllow(string? msg = null)
         {
             await new TestTransferEndpoint().Endpoint(context);// 如果不是我们签发的，直接返回fake gpt
-            await context.Response.WriteAsync("使用的密钥不是我们签发的，或者在数据库中找不到这个密钥");
+            msg ??= "使用的密钥不是我们签发的，或者在数据库中找不到这个密钥";
+            await context.Response.WriteAsync(msg);
         }
 
         OpenKey? openKey;
@@ -44,45 +48,89 @@ public class SecureMiddleware
             return;
         }
 
-        openKey = data.OpenKeys.FirstOrDefault(key=>key.Key==authKey);
-        if (openKey == null)
+        if (_configuration.OpenForPublic)
         {
-            _table.PutNotAllowKey(authKey??"");
-            // context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-            await KeyNotAllow();
-            return;
+            var lowerKey = authKey.ToLower();
+            if (lowerKey.StartsWith("c"))
+            {
+                // 使用chatanywhere 转发
+                context.Items["RequestKey"] = authKey[1..];
+                context.Items["Free"] = true;
+                context.Items["ApiUrl"] = "https://api.chatanywhere.com.cn";
+            }else if (lowerKey.StartsWith("ss"))
+            {
+                // 使用sb转发
+                context.Items["RequestKey"] = authKey[1..];
+                context.Items["Free"] = true;
+                context.Items["ApiUrl"] = "https://api.openai-sb.com";
+            }else if (lowerKey.StartsWith("o"))
+            {
+                // 使用openai，用alias转发
+                context.Items["RequestKey"] = authKey[1..];
+                context.Items["Free"] = true;
+                context.Items["ApiUrl"] = "https://aliasbot.asia";
+            }
+            else if (lowerKey.StartsWith("h"))
+            {
+
+                var list = authKey.Trim().Split(" ");
+                // 手动填写地址转发
+                context.Items["Free"] = true;
+                context.Items["ApiUrl"] = list[0];
+                context.Items["RequestKey"] = list[1];
+            }
         }
 
-
-        context.Items["RequestKey"] = openKey;
-
-        switch (openKey.PricingMethod)
+        if (!(bool)(context.Items["Free"] ?? false))
         {
-            case PricingMethod.RequestTime:
-                if (openKey.AvailableRequest <= 0)
-                {
-                    context.Response.StatusCode = StatusCodes.Status423Locked;
-                    await context.Response.WriteAsync("当前计价方式，请求次数已经耗尽");
-                    return;
-                }
-
-                context.Items[nameof(PricingMethod)] = openKey.PricingMethod;
-                break;
-            case PricingMethod.Token:
-                if (openKey.AvailableRequestToken <= 0)
-                {
-                    context.Response.StatusCode = StatusCodes.Status423Locked;
-                    await context.Response.WriteAsync("当前计价方式，请求Token已经耗尽");
-                    return;
-                }
-                context.Items[nameof(PricingMethod)] = openKey.PricingMethod;
-                break;
-            case null:
-                context.Response.StatusCode = StatusCodes.Status423Locked;
-                await context.Response.WriteAsync("请前往控制台选择当前的计价方式");
+            openKey = data.OpenKeys.FirstOrDefault(key => key.Key == authKey);
+            if (openKey == null)
+            {
+                _table.PutNotAllowKey(authKey ?? "");
+                // context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                await KeyNotAllow();
                 return;
+            }
+
+            if (openKey.Available == false)
+            {
+                _table.PutNotAllowKey(authKey ?? "");
+                // context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                await KeyNotAllow("当前密钥被禁用");
+                return;
+            }
+
+
+            context.Items["RequestKey"] = openKey;
+
+            switch (openKey.PricingMethod)
+            {
+                case PricingMethod.RequestTime:
+                    if (openKey.AvailableRequest <= 0)
+                    {
+                        context.Response.StatusCode = StatusCodes.Status423Locked;
+                        await context.Response.WriteAsync("当前计价方式，请求次数已经耗尽");
+                        return;
+                    }
+
+                    context.Items[nameof(PricingMethod)] = openKey.PricingMethod;
+                    break;
+                case PricingMethod.Token:
+                    if (openKey.AvailableRequestToken <= 0)
+                    {
+                        context.Response.StatusCode = StatusCodes.Status423Locked;
+                        await context.Response.WriteAsync("当前计价方式，请求Token已经耗尽");
+                        return;
+                    }
+                    context.Items[nameof(PricingMethod)] = openKey.PricingMethod;
+                    break;
+                case null:
+                    context.Response.StatusCode = StatusCodes.Status423Locked;
+                    await context.Response.WriteAsync("请前往控制台选择当前的计价方式");
+                    return;
+            }
         }
-        // 用户还有余额，并且选择了计价方式
+
         await _next(context);
     }
 }
