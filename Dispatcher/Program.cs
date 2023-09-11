@@ -136,7 +136,7 @@ AutoMigration.Migration(app);
 BackgroundJob.Enqueue<Starter>(starter => starter.Init());
 RecurringJob.AddOrUpdate<DynamicTable>("easyJob",
     table => table.Reset(), Cron.Minutely);
-RecurringJob.AddOrUpdate<Syncer>("fetchKey",syncer=> syncer.UpdateDynamicKeys(),Cron.Minutely);
+RecurringJob.AddOrUpdate<Syncer>("fetchKey",syncer=> syncer.UpdateDynamicKeys(),Cron.Hourly);
 await SeedIdentityUser.Ensure(app);
 if (!app.Environment.IsDevelopment())
 {

@@ -60,13 +60,14 @@ public class RequestChooserMiddleware
             }
             var index = random.Next(_repository.Count);
             var pickedKey = _repository.OpenPoolKeys[index];
-            if (pickedKey?.Available == false)
+            var copyKey = pickedKey.Clone();
+            if (copyKey?.Available == false)
             {
                 var completion = Completion.GetDefaultOrExample("数据异常，请联系管理员！");
                 await GptReply.Reply(context,completion);
                 return;
             }
-            context.Items["PickedKey"] = pickedKey;
+            context.Items["PickedKey"] = copyKey;
         }
         await _next(context);
     }

@@ -71,4 +71,17 @@ public class PoolKey
     {
         return $"PoolKeyId: {PoolKeyId}, Cipher: {Cipher}, Hosts: {Hosts}, HandHosts: {HandHosts}, Priority: {Priority}, Available: {Available}";
     }
+
+    public PoolKey Clone()
+    {
+        return new PoolKey()
+        {
+            PoolKeyId = PoolKeyId,
+            Cipher = Cipher,
+            Hosts = Hosts,
+            HandHosts = HandHosts,
+            Available = Available,
+            Priority = Priority
+        };
+    }
 }
